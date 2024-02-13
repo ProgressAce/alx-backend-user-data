@@ -35,9 +35,15 @@ class Auth:
         return False
 
     def authorization_header(self, request=None) -> str:
-        """Validates requests to secure the API."""
+        """Validates requests to secure the API.
 
-        if request is None or not request.get("Authorization"):
+        Arg:
+            request: the request sent to the flask server.
+
+        Returns:
+            the authorization of a request, otherwise None."""
+
+        if request is None or not request.headers.get("Authorization"):
             return None
 
         return request.get("Authorization")
