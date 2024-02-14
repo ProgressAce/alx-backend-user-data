@@ -106,3 +106,40 @@ class BasicAuth(Auth):
             return user
 
         return None
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """Retrieves the User instance of a request.
+
+        Arg:
+            request: the request."""
+
+        # check that request has Authorization header
+        auth_value = self.authorization_header(request)
+        if auth_value is None:
+            return None
+
+        # confirm that Authorization value begins with 'Basic '
+        # and retrieve the substring after 'Basic '
+        base64_encoded_str = self.extract_base64_authorization_header(
+            auth_value)
+        if base64_encoded_str is None:
+            return None
+
+        # decode the substring which is a base64 encoding
+        base64_decoded_str = self.decode_base64_authorization_header(
+            base64_encoded_str)
+        if base64_decoded_str is None:
+            return None
+
+        # split the decoded substring into email and password
+        user_credentials = self.extract_user_credentials(base64_decoded_str)
+        if user_credentials == (None, None):
+            return None
+
+        # deliver the split email and password
+        user = self.user_object_from_credentials(
+            user_credentials[0], user_credentials[1])
+        if user is None:
+            return None
+
+        return user
