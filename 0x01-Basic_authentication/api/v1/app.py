@@ -59,6 +59,11 @@ if __name__ == "__main__":
 
         auth = Auth()
 
+    if auth_type == "basic_auth":
+        from api.v1.auth.basic_auth import BasicAuth
+
+        auth = BasicAuth()
+
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
     app.run(host=host, port=port)
