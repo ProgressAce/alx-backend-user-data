@@ -3,7 +3,6 @@
 Route module for the API
 """
 from os import getenv
-from api.v1.auth.auth import Auth
 from api.v1.views import app_views
 from flask import Flask, jsonify, abort, request
 from flask_cors import CORS, cross_origin
@@ -39,10 +38,12 @@ def filter_request_beforehand():
     """Filters each request before passing it as route."""
 
     if auth:
-        if not auth.require_auth(
+        # request path is part of excluded list then it authen... won't occur
+        if auth.require_auth(
             request.path,
             ["/api/v1/status/", "/api/v1/unauthorized/", "/api/v1/forbidden/"],
         ):
+            print(f"**{request.path} is part of excluded list")
             if auth.authorization_header(request) is None:
                 abort(401)
 
@@ -54,6 +55,8 @@ if __name__ == "__main__":
     # determine the authentication type
     auth_type = getenv("AUTH_TYPE")
     if auth_type == "auth":
+        from api.v1.auth.auth import Auth
+
         auth = Auth()
 
     host = getenv("API_HOST", "0.0.0.0")
