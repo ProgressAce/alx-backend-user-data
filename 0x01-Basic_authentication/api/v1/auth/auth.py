@@ -1,8 +1,8 @@
-#!/usr/bin/
+#!/usr/bin/env python3
 """Manages API authentication."""
 
-from flask import request as req
 from typing import List, TypeVar
+from flask import request as req
 
 
 class Auth:
@@ -49,5 +49,5 @@ class Auth:
         return request.get("Authorization")
 
     def current_user(self, request=None) -> TypeVar("User"):
-        """doc"""
+        """Validates the current user."""
         return None
