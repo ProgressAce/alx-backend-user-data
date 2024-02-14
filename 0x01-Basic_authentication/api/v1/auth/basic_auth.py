@@ -3,7 +3,10 @@
 
 import base64
 import binascii
+from typing import TypeVar, List
 from api.v1.auth.auth import Auth
+from models.base import DATA
+from models.user import User
 
 
 class BasicAuth(Auth):
@@ -43,10 +46,10 @@ class BasicAuth(Auth):
 
         try:
             decoded_base64 = base64.b64decode(base64_authorization_header)
-        except binascii.Error:
-            return None
 
-        return decoded_base64.decode("utf-8")
+            return decoded_base64.decode("utf-8")
+        except (binascii.Error, UnicodeDecodeError):
+            return None
 
     def extract_user_credentials(
             self, decoded_base64_authorization_header: str
@@ -72,3 +75,34 @@ class BasicAuth(Auth):
         split_str = decoded_base64_authorization_header.split(':')
 
         return (split_str[0], split_str[1])
+
+    def user_object_from_credentials(
+            self, user_email: str, user_pwd: str
+    ) -> TypeVar('User'):
+        """Returns the User instance based on his email and password.
+
+        Args:
+            user_email: the user's email.
+            user_pwd: the user's password."""
+
+        if user_email is None or type(user_email) is not str:
+            return None
+        if user_pwd is None or type(user_pwd) is not str:
+            return None
+
+        # validate that there is an existing user in the database.
+        if DATA.get(User.__name__) is None:
+            return None
+
+        # looks for any User instance with an email of <user_email>
+        user_list: List[User] = User.search({"email": user_email})
+
+        if len(user_list) != 0:
+            user = user_list[0]
+
+            if not user.is_valid_password(user_pwd):
+                return None
+
+            return user
+
+        return None
