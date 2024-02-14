@@ -50,7 +50,7 @@ def filter_request_beforehand():
             current_user = auth.current_user(request)
             if current_user is None:
                 abort(403)
-            
+
             request.current_user = current_user
 
 
@@ -66,6 +66,11 @@ if __name__ == "__main__":
         from api.v1.auth.basic_auth import BasicAuth
 
         auth = BasicAuth()
+
+    if auth_type == 'session_auth':
+        from api.v1.auth.session_auth import SessionAuth
+
+        auth = SessionAuth()
 
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
