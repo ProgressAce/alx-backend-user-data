@@ -43,7 +43,7 @@ def filter_request_beforehand():
             request.path,
             ["/api/v1/status/", "/api/v1/unauthorized/", "/api/v1/forbidden/"],
         ):
-            print(f"**{request.path} is part of excluded list")
+
             if auth.authorization_header(request) is None:
                 abort(401)
 
