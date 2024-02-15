@@ -36,13 +36,13 @@ class Auth:
         return False
 
     def authorization_header(self, request=None) -> str:
-        """Validates requests to secure the API.
+        """Checks that a request has an Authorization header.
 
         Arg:
             request: the request sent to the flask server.
 
         Returns:
-            the authorization of a request, otherwise None."""
+            the authorization header's value of the request, otherwise None."""
 
         if request is None or not request.headers.get("Authorization"):
             return None
