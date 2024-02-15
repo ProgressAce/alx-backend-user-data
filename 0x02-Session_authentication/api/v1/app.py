@@ -14,6 +14,23 @@ app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 auth = None
 
+# determine the authentication type
+auth_type = getenv("AUTH_TYPE")
+if auth_type == "auth":
+    from api.v1.auth.auth import Auth
+
+    auth = Auth()
+
+if auth_type == "basic_auth":
+    from api.v1.auth.basic_auth import BasicAuth
+
+    auth = BasicAuth()
+
+if auth_type == 'session_auth':
+    from api.v1.auth.session_auth import SessionAuth
+
+    auth = SessionAuth()
+
 
 @app.errorhandler(401)
 def unauthorized(error) -> str:
@@ -57,23 +74,6 @@ def filter_request_beforehand():
 
 
 if __name__ == "__main__":
-    # determine the authentication type
-    auth_type = getenv("AUTH_TYPE")
-    if auth_type == "auth":
-        from api.v1.auth.auth import Auth
-
-        auth = Auth()
-
-    if auth_type == "basic_auth":
-        from api.v1.auth.basic_auth import BasicAuth
-
-        auth = BasicAuth()
-
-    if auth_type == 'session_auth':
-        from api.v1.auth.session_auth import SessionAuth
-
-        auth = SessionAuth()
-
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
     app.run(host=host, port=port)
