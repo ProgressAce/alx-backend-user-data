@@ -2,8 +2,9 @@
 """Implements a SessionAuth authentication system."""
 
 import uuid
-from api.v1.auth.auth import Auth
 from typing import Dict
+from api.v1.auth.auth import Auth
+from models.user import User
 
 
 class SessionAuth (Auth):
@@ -30,7 +31,7 @@ class SessionAuth (Auth):
     def user_id_for_session_id(self, session_id: str = None) -> str:
         """Returns a User ID based on a Session ID.
 
-        Used for retrieving a user_id based on its link with session_id
+        Used for retrieving a user_id based on its link with a session_id
 
         Arg:
             session_id: the session id."""
@@ -41,3 +42,16 @@ class SessionAuth (Auth):
         user_id = self.user_id_by_session_id.get(session_id)
 
         return user_id
+
+    def current_user(self, request=None):
+        """Returns a User instance based on a cookie value.
+
+        Arg:
+            request: the http request."""
+
+        cookie_value = self.session_cookie(request)
+        user_id = self.user_id_for_session_id(cookie_value)
+
+        user = User.get(user_id)
+
+        return user
