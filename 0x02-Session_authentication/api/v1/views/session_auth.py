@@ -4,7 +4,7 @@
 
 from os import getenv
 from api.v1.views import app_views
-from flask import jsonify, request
+from flask import abort, jsonify, request
 from models.user import User
 
 
@@ -42,3 +42,23 @@ def auth_session_login():
     response.set_cookie(getenv("SESSION_NAME"), session_id)
 
     return response
+
+
+@app_views.route('/auth_session/logout', methods=['DELETE'],
+                 strict_slashes=False)
+def session_logout():
+    """ DELETE /auth_session/logout
+
+    Returns:
+      - empty JSON if the session has been deleted successfully
+        with a 200 status code.
+      - 404 if unsuccessful
+    """
+
+    from api.v1.app import auth
+
+    is_destroyed = auth.destroy_session(request)
+    if not is_destroyed:
+        abort(404)
+
+    return jsonify({}), 200
