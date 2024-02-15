@@ -41,10 +41,12 @@ def filter_request_beforehand():
         # request path is part of excluded list then it authen... won't occur
         if auth.require_auth(
             request.path,
-            ["/api/v1/status/", "/api/v1/unauthorized/", "/api/v1/forbidden/"],
+            ["/api/v1/status/", "/api/v1/unauthorized/",
+                "/api/v1/forbidden/", "/api/v1/auth_session/login/"],
         ):
 
-            if auth.authorization_header(request) is None:
+            if auth.authorization_header(request) == \
+                    auth.session_cookie(request) == None:
                 abort(401)
 
             current_user = auth.current_user(request)
