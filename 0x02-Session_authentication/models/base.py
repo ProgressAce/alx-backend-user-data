@@ -131,6 +131,7 @@ class Base():
             if len(attributes) == 0:
                 return True
             for k, v in attributes.items():
+                # if object has attribute k with value of v then...
                 if (getattr(obj, k) != v):
                     return False
             return True
