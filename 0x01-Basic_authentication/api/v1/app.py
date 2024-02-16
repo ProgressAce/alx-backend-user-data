@@ -14,6 +14,18 @@ app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 auth = None
 
+# determine the authentication type
+auth_type = getenv("AUTH_TYPE")
+if auth_type == "auth":
+    from api.v1.auth.auth import Auth
+
+    auth = Auth()
+
+if auth_type == "basic_auth":
+    from api.v1.auth.basic_auth import BasicAuth
+
+    auth = BasicAuth()
+
 
 @app.errorhandler(401)
 def unauthorized(error) -> str:
@@ -41,7 +53,7 @@ def filter_request_beforehand():
         # request path is part of excluded list then it authen... won't occur
         if auth.require_auth(
             request.path,
-            ["/api/v1/status/", "/api/v1/unauthorized/", "/api/v1/forbidden/"],
+            ["/api/v1/status/", "/api/v1/unauthorized/", "/api/v1/forbidden/"]
         ):
 
             if auth.authorization_header(request) is None:
@@ -52,18 +64,6 @@ def filter_request_beforehand():
 
 
 if __name__ == "__main__":
-    # determine the authentication type
-    auth_type = getenv("AUTH_TYPE")
-    if auth_type == "auth":
-        from api.v1.auth.auth import Auth
-
-        auth = Auth()
-
-    if auth_type == "basic_auth":
-        from api.v1.auth.basic_auth import BasicAuth
-
-        auth = BasicAuth()
-
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
     app.run(host=host, port=port)
