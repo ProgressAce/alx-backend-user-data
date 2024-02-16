@@ -56,8 +56,9 @@ class BasicAuth(Auth):
     ) -> (str, str):
         """Returns the user email and password from the Base64 decoded value.
 
-        It is assumed that <decoded_base64_authorization_header> will
-        only contain one ':'.
+        It is assumed that <decoded_base64_authorization_header>, the decoded
+        base64 string will contain one ':' that will differentiate the email
+        and the password. The password is allowed to consist of ':' characters.
 
         Arg:
             decoded_base64_authorization_header: the decoded base64 value."""
@@ -72,7 +73,7 @@ class BasicAuth(Auth):
             return no_details
 
         # seperate email and password parts from the decoded base64 string
-        split_str = decoded_base64_authorization_header.split(':')
+        split_str = decoded_base64_authorization_header.split(':', 1)
 
         return (split_str[0], split_str[1])
 
