@@ -36,6 +36,11 @@ if auth_type == 'session_exp_auth':
 
     auth = SessionExpAuth()
 
+if auth_type == 'session_db_auth':
+    from api.v1.auth.session_db_auth import SessionDBAuth
+
+    auth = SessionDBAuth()
+
 
 @app.errorhandler(401)
 def unauthorized(error) -> str:
