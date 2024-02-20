@@ -2,8 +2,9 @@
 """Web server Flask set up."""
 
 from auth import Auth
-from flask import abort, Flask, jsonify, request, Response
 from typing import Dict
+from user import User
+from flask import abort, Flask, jsonify, request, Response
 
 AUTH = Auth()
 app: Flask = Flask(__name__)
@@ -35,14 +36,14 @@ def user_registration():
 
     error_msg: str = None
 
-    email = request.form.get('email')
-    password = request.form.get('password')
+    email: str = request.form.get('email')
+    password: str = request.form.get('password')
 
     # TODO: validate form data
     # use/return them for more detailed error messages
 
     try:
-        user = AUTH.register_user(email, password)
+        user: Us = AUTH.register_user(email, password)
 
         # None is returned if the given arguments/form data were invalid
         if not user:

@@ -8,7 +8,7 @@ from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.session import Session
 
-from typing import Dict
+from typing import Any, Dict
 from user import Base, User
 
 
@@ -19,10 +19,10 @@ class DB:
     def __init__(self) -> None:
         """Initialize a new DB instance
         """
-        self._engine = create_engine("sqlite:///a.db", echo=False)
+        self._engine: Any = create_engine("sqlite:///a.db", echo=False)
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
-        self.__session = None
+        self.__session: Session = None
 
     @property
     def _session(self) -> Session:
@@ -77,7 +77,7 @@ class DB:
             return -1
 
         # no error catching used
-        user = self.find_user_by(id=user_id)
+        user: User = self.find_user_by(id=user_id)
 
         for key, value in kwargs.items():
             if hasattr(user, key):
