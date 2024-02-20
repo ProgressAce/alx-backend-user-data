@@ -43,7 +43,7 @@ def user_registration():
     # use/return them for more detailed error messages
 
     try:
-        user: Us = AUTH.register_user(email, password)
+        user: User = AUTH.register_user(email, password)
 
         # None is returned if the given arguments/form data were invalid
         if not user:
