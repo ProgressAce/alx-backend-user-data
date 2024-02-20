@@ -2,7 +2,7 @@
 """Web server Flask set up."""
 
 from auth import Auth
-from flask import Flask, jsonify, request
+from flask import abort, Flask, jsonify, request, Response
 from typing import Dict
 
 AUTH = Auth()
@@ -14,7 +14,7 @@ def index():
     """Returns a message for index route '/'.
 
     response - message: Bienvenue"""
-    return jsonify({"message": "Bienvenue"})
+    return jsonify({"message": "Bienvenue"}), 200
 
 
 @app.route('/users', methods=['POST'], strict_slashes=False)
@@ -30,7 +30,9 @@ def user_registration():
       code 200
     """
 
-    r_json: Dict = None
+    # TODO: when sending the same curl request, it results in an exception
+    # it has to do with the use of the same session object even after commiting
+
     error_msg: str = None
 
     email = request.form.get('email')
@@ -44,11 +46,38 @@ def user_registration():
 
         # None is returned if the given arguments/form data were invalid
         if not user:
-            return jsonify({"message": "missing email and/or password"})
+            return jsonify({"message": "missing email and/or password"}), 400
 
-        return jsonify({"email": f"{email}", "message": "user created"})
+        return jsonify({"email": f"{email}", "message": "user created"}), 200
     except ValueError:
-        return jsonify({"message": "email already registered"})
+        return jsonify({"message": "email already registered"}), 400
+
+
+@app.route('/sessions', methods=['POST'], strict_slashes=False)
+def login():
+    """ POST /sessions
+    to login.
+    JSON body:
+      - email
+      - password
+    Return:
+      * 401 status for incorrect login information.
+      * 200 ....."""
+
+    email: str = request.form.get('email')
+    password: str = request.form.get('password')
+
+    if not AUTH.valid_login(email, password):
+        abort(401)
+
+    session_id: str = AUTH.create_session(email)
+    if not session_id:  # not entirely necessary
+        abort(401)
+
+    response: Response = jsonify({"email": f"{email}", "message": "logged in"})
+    response.set_cookie("session_id", session_id)
+
+    return response, 200
 
 
 if __name__ == '__main__':
