@@ -2,9 +2,8 @@
 """Web server Flask set up."""
 
 from auth import Auth
-from typing import Dict
 from user import User
-from flask import abort, Flask, jsonify, request, Response
+from flask import abort, Flask, jsonify, redirect, request, Response
 
 AUTH = Auth()
 app: Flask = Flask(__name__)
@@ -31,8 +30,9 @@ def user_registration():
       code 200
     """
 
-    # TODO: when sending the same curl request, it results in an exception
-    # it has to do with the use of the same session object even after commiting
+    # TODO: fix bug - repeating this request causes an exception with
+    # this and other routes.
+    # it has to do with the use of the same session object even commiting
 
     error_msg: str = None
 
@@ -79,6 +79,62 @@ def login():
     response.set_cookie("session_id", session_id)
 
     return response, 200
+
+
+@app.route('/sessions', methods=['DELETE'], strict_slashes=False)
+def logout():
+    """ DELETE /sessions
+
+    Request is expected to have a cookie with session_id as key
+    and a session ID its value.
+
+    The user with requested session ID is found, their session is destroyed
+    and the user is then redirected to GET /
+
+    Returns:
+      - 200, if the session discard and redirect were successful.
+      - 403, if the user does not exist.
+    """
+
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        abort(403)
+
+    user = AUTH.get_user_from_session_id(session_id)
+    if not user:
+        abort(403)  # Forbidden
+
+    try:
+        AUTH.destroy_session(user.id)
+    except ValueError:
+        abort(403)  # ValueError occured during session discard
+
+    return redirect('/', code=302)
+
+
+@app.route('/profile', methods=['GET'], strict_slashes=False)
+def user_profile():
+    """ GET /profile
+
+    session_id cookie is expected with the request.
+    Return:
+      - 200, with JSON payload if user exists.
+      - 403, if user or session ID does not exist.
+    """
+
+    # TODO: fix bug: the route cannot be repeated without an exception
+    # being raised.
+    # likely has to to with sqlalchemy session not being reset properly
+
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        abort(403)
+
+    user = AUTH.get_user_from_session_id(session_id)
+    if not user:
+        abort(403)  # Forbidden
+
+    return jsonify({"email": user.email}), 200
 
 
 if __name__ == '__main__':
