@@ -166,3 +166,63 @@ class Auth:
             raise err
 
         return None
+
+    def get_reset_password_token(self, email: str) -> str:
+        """Generates a reset token for a specific user.
+
+        The user is found via the <email> provided.
+        A reset token is generated for the user in the form of a UUID.
+
+        Raises:
+          - ValueError, if user does not exist.
+
+        Returns:
+          - the reset token, a UUID, if the user exists.
+        """
+
+        if not isinstance(email, str) or len(email) < 5:
+            raise ValueError
+
+        # InvalidRequestError does not need to be handled yet
+        try:
+            user: User = self._db.find_user_by(email=email)
+        except NoResultFound:
+            raise ValueError
+
+        reset_token: uuid.UUID = uuid.uuid4()
+
+        # raises ValueError for arguments not corresponding to the user model
+        self._db.update_user(user.id, reset_token=reset_token)
+
+    def update_password(self, reset_token: str, password: str) -> None:
+        """Updates the hashed password of the specified user.
+
+        The reset_token is used to find the specific user.
+        The password is hashed and updates the user's current passsword
+        with this new one.
+
+        Args:
+            reset_token: token used to find the specific user.
+            password: the password replace the user's existing one.
+
+        Raises:
+          - ValueError, if the user does not exist.
+        """
+
+        if not isinstance(reset_token, str) or len(reset_token) < 1:
+            raise ValueError
+
+        if not isinstance(password, str) or len(password) < 1:
+            raise ValueError
+
+        # InvalidRequestError does not need to be handled yet
+        try:
+            user: User = self._db.find_user_by(reset_token=reset_token)
+        except NoResultFound:
+            raise ValueError
+
+        hashed_pwd: str = _hash_password(password)
+
+        # raises ValueError for arguments not corresponding to the user model
+        self._db.update_user(user.id, hashed_password=hashed_pwd)
+        self._db.update_user(user.id, reset_token=None)
