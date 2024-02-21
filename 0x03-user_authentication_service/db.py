@@ -58,11 +58,18 @@ class DB:
             kwargs: keyworded arguments indicating which attribute values
             to update for the user."""
 
-        # TODO: validate args
-        try:
-            user: User = self._session.query(User).filter_by(**kwargs).one()
-        except (NoResultFound, InvalidRequestError) as exception:
-            raise exception
+        if not kwargs:
+            raise InvalidRequestError
+
+        # ensure all passed keywords are existing User attributes.
+        for key in kwargs:
+            if not hasattr(User, key):
+                raise InvalidRequestError
+
+        user: User = self._session.query(User).filter_by(**kwargs).first()
+        if not user:
+            raise NoResultFound
+
         return user
 
     def update_user(self, user_id: int, **kwargs: Dict) -> None:
@@ -71,13 +78,18 @@ class DB:
         Arg:
             user_id: ID to identify the user.
             kwargs: keyworded arguments indicating which attribute values
-            to update for the user."""
+            to update for the user.
 
-        if not isinstance(user_id, int) or user_id < 1:
-            return -1
+        Raises:
+            TypeError, for any argument not corresponding to an existing
+            User attribute."""
 
-        # no error catching used
+        if not isinstance(user_id, int):
+            raise ValueError
+
         user: User = self.find_user_by(id=user_id)
+        if not user:
+            raise ValueError
 
         for key, value in kwargs.items():
             if hasattr(user, key):
