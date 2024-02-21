@@ -28,7 +28,7 @@ def _hash_password(password: str) -> bytes:
     return hash_pwd
 
 
-def _generate_uuid():
+def _generate_uuid() -> str:
     """Generates and returns a string representation of a new UUID."""
 
     uid: uuid.UUID = uuid.uuid4()
@@ -124,3 +124,43 @@ class Auth:
 
         self._db.update_user(user_id=user.id, session_id=session_id)
         return session_id
+
+    def get_user_from_session_id(self, session_id: str) -> User:
+        """Gets the user of the related session ID.
+
+        Arg:
+            session_id: the session ID belonging to a specific user.
+
+        Returns:
+            None - if the user is not found or session ID is None.
+            user instnace - if the user was found.
+        """
+
+        if not session_id:
+            return None
+
+        try:
+            user: User = self._db.find_user_by(session_id=session_id)
+        except (NoResultFound, InvalidRequestError):
+            return None
+
+        return user
+
+    def destroy_session(self, user_id: int) -> None:
+        """Updates a user's session ID to None.
+
+        This indicates that the user's session ID has been discarded.
+
+        Arg:
+            session_id: the session ID to discard.
+        """
+
+        if not isinstance(user_id, int):
+            raise ValueError
+
+        try:
+            self._db.update_user(user_id, session_id=None)
+        except ValueError as err:
+            raise err
+
+        return None
