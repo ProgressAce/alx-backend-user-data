@@ -51,7 +51,7 @@ class DB:
 
         return user
 
-    def find_user_by(self, **kwargs: Dict) -> User:
+    def find_user_by(self, **kwargs) -> User:
         """Looks for a user/row in the 'users' database table.
 
         Args:
@@ -72,7 +72,7 @@ class DB:
 
         return user
 
-    def update_user(self, user_id: int, **kwargs: Dict) -> None:
+    def update_user(self, user_id: int, **kwargs) -> None:
         """Updates a user's details in the DB.
 
         Arg:
@@ -97,7 +97,6 @@ class DB:
             else:
                 raise ValueError
 
-        self._session.add(user)
         self._session.commit()
 
         return None
