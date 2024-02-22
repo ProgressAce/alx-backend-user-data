@@ -150,7 +150,7 @@ def get_reset_password_token():
     email: str = request.form.get('email')
 
     try:
-        reset_token: User = AUTH.get_reset_password_token
+        reset_token: str = AUTH.get_reset_password_token(email)
     except ValueError:
         abort(403)
 
