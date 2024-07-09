@@ -72,8 +72,8 @@ class BasicAuth(Auth):
         separate the user email and password.
         This method returns 2 values
 
-        The method assumes that decoded_base64_authorization_header will
-        contain only one `:`
+        The method accepts decoded_base64_authorization_header with a password
+        containing `:`, but assumes that the email does not include one.
         """
         if not decoded_base64_authorization_header:
             return None
@@ -85,7 +85,7 @@ class BasicAuth(Auth):
         if ':' not in decoded_base64_authorization_header:
             return None
 
-        credentials = decoded_base64_authorization_header.split(':')
+        credentials = decoded_base64_authorization_header.split(':', 1)
         email = credentials[0]
         pwd = credentials[1]
 
