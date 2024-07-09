@@ -15,7 +15,7 @@ class Auth:
 
         The path is exempted if it is part of the excluded_paths list.
         Methods assumes that excluded_paths contains string paths always ending
-        by a `/`. 
+        by a `/`.
         A url path is slash tolerant.
         (/api/v1/status and /api/v1/status/) both return False.
 
@@ -45,15 +45,16 @@ class Auth:
         """
         if request is None:
             return None
-        
+
         auth_header = req.headers.get('Authorization')
-        
+
         if auth_header is None:
             return None
-        
+
         return auth_header
 
-    def current_user(self, request: TypeError('req') = None) -> TypeVar('User'):
+    def current_user(self, request: TypeError('req') = None) \
+            -> TypeVar('User'):
         """ NEEDS to be implemented.
         """
         return None
