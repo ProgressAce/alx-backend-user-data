@@ -59,7 +59,7 @@ class BasicAuth(Auth):
         try:
             byte_base64 = base64.b64decode(base64_authorization_header)
             decoded_auth_value = byte_base64.decode('utf-8')
-        except binascii.Error:
+        except (binascii.Error, UnicodeDecodeError):
             return None
 
         return decoded_auth_value
@@ -115,4 +115,33 @@ class BasicAuth(Auth):
         if not user.is_valid_password(user_pwd):
             return None
 
+        return user
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """ Retrieves the User instance for a request.
+
+        Dependencies:
+            self.authorization_header
+            self.extract_base64_authorization_header
+            self.decode_base64_authorization_header
+            self.extract_user_credentials
+            self.user_object_from_credentials
+
+        Returns:
+          - the user instance for a request of a specific User
+          - None if authentication of user is false.
+        """
+
+        if not request:
+            return None
+
+        auth_value = self.authorization_header(request)
+        # retrieve just the base64 value of the auth header value
+        base64_value = self.extract_base64_authorization_header(auth_value)
+        # decode the base64 value
+        decoded_value = self.decode_base64_authorization_header(base64_value)
+        # separate the credentials
+        email, pwd = self.extract_user_credentials(decoded_value)
+
+        user = self.user_object_from_credentials(email, pwd)
         return user
