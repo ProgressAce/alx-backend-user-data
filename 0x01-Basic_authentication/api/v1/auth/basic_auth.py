@@ -76,14 +76,14 @@ class BasicAuth(Auth):
         containing `:`, but assumes that the email does not include one.
         """
         if not decoded_base64_authorization_header:
-            return None
+            return None, None
 
         # ensure the argument is a string and contains `:`
         if not isinstance(decoded_base64_authorization_header, str):
-            return None
+            return None, None
 
         if ':' not in decoded_base64_authorization_header:
-            return None
+            return None, None
 
         credentials = decoded_base64_authorization_header.split(':', 1)
         email = credentials[0]
