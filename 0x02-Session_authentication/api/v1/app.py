@@ -38,16 +38,19 @@ def authentication_check():
         excl_paths = [
             '/api/v1/status/',
             '/api/v1/unauthorized/',
-            '/api/v1/forbidden/']
+            '/api/v1/forbidden/',
+            '/api/v1/auth_session/login/']
 
         # excluded paths are ignored from authentication
         if auth.require_auth(request.path, excl_paths) is True:
-            if auth.authorization_header(request) is None:
+            if auth.authorization_header(request) and \
+                    auth.session_cookie(request):
                 abort(401)
+
             if auth.current_user(request) is None:
                 abort(403)
 
-    request.current_user = auth.current_user(request)
+        request.current_user = auth.current_user(request)
 
 
 @app.errorhandler(401)

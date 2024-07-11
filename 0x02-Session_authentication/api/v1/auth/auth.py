@@ -2,8 +2,10 @@
 """
 App's Authentication system
 """
+from os import getenv
 from typing import TypeVar, List
 from flask import request as req
+from flask import Request
 
 
 class Auth:
@@ -58,3 +60,23 @@ class Auth:
         """ NEEDS to be implemented.
         """
         return None
+
+    def session_cookie(self, request: Request = None):
+        """ Returns a cookie value from a request.
+
+        Uses the cookie name, according to the environment variable
+        SESSION_NAME.
+        Returns:
+          - the cookie value of the request.
+          - None, if the request is invalid or the session_name is not found.
+        """
+        if not request:
+            return None
+
+        session_name = getenv('SESSION_NAME', None)
+
+        cookie_session_value = request.cookies.get(session_name)
+        if not cookie_session_value:
+            return None
+
+        return cookie_session_value
