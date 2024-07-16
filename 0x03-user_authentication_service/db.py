@@ -2,7 +2,6 @@
 """DB module
 """
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import InvalidRequestError
@@ -70,3 +69,26 @@ class DB:
             raise NoResultFound
 
         return user
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Updates a user's attributes and saves it to the database.
+
+        Dependency:
+          - The user is found using DB's `find_user_by` method.
+        Raises:
+          - TypeError: when an invalid keyword argument is passed.
+        Returns:
+          - None
+        """
+        try:
+            user: User = self.find_user_by(id=user_id)
+        except NoResultFound:
+            raise NoResultFound
+        except InvalidRequestError:  # invalid argument passed
+            raise TypeError
+
+        for attr, value in kwargs.items():
+            setattr(user, attr, value)
+
+        self._session.commit()
+        return None
