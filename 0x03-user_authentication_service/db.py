@@ -2,7 +2,7 @@
 """DB module
 """
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.session import Session
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
@@ -17,10 +17,14 @@ class DB:
     def __init__(self) -> None:
         """Initialize a new DB instance
         """
-        self._engine = create_engine("sqlite:///a.db", echo=False)
+        self._engine = create_engine(
+            "sqlite:///a.db",
+            connect_args={"check_same_thread": False},
+            echo=False)
         Base.metadata.drop_all(self._engine)
         Base.metadata.create_all(self._engine)
-        self.__session = None
+        self._session_factory = sessionmaker(bind=self._engine)
+        self.__session = scoped_session(self._session_factory)
 
     @property
     def _session(self) -> Session:
