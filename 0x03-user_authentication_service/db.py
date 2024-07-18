@@ -39,7 +39,7 @@ class DB:
         """Saves a new user to the database.
         No validation is done.
         Returns:
-          - The new user.        
+          - The new user.
         """
         user: User = User(email=email, hashed_password=hashed_password)
         self._session.add(user)
